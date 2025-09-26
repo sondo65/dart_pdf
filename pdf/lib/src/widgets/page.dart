@@ -236,14 +236,13 @@ class Page {
         ..saveContext()
         ..setTransform(Matrix4.identity()
           ..rotateZ(-math.pi / 2)
-          ..translateByDouble(
+          ..translate(
               -pageFormat.height - _margin.left + _margin.top,
               -pageFormat.height +
                   pageFormat.width +
                   _margin.top -
                   _margin.right,
-              0,
-              1));
+              0));
       child.paint(context);
       context.canvas.restoreContext();
     } else {

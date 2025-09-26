@@ -202,8 +202,8 @@ class MultiPage extends Page {
         ..setTransform(
           Matrix4.identity()
             ..rotateZ(-math.pi / 2)
-            ..translateByDouble(x - pageHeight + _margin.top - _margin.left,
-                y + _margin.left - _margin.bottom, 0, 1),
+            ..translate(x - pageHeight + _margin.top - _margin.left,
+                y + _margin.left - _margin.bottom, 0),
         );
       child.paint(context);
       context.canvas.restoreContext();

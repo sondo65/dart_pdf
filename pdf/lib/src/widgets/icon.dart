@@ -132,7 +132,7 @@ class Icon extends StatelessWidget {
       switch (textDirection) {
         case TextDirection.rtl:
           iconWidget = Transform(
-            transform: Matrix4.identity()..scaleByDouble(-1, 1, 1, 1),
+            transform: Matrix4.identity()..scale(-1, 1, 1),
             alignment: Alignment.center,
             child: iconWidget,
           );
