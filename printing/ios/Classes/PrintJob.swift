@@ -258,47 +258,48 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         do {
             try data.write(to: fileURL, options: .atomic)
+            print("PDF file saved to: \(fileURL.path)")
         } catch {
-            print("sharePdf error: \(error.localizedDescription)")
+            print("sharePdf error writing file: \(error.localizedDescription)")
             return
         }
 
         let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
         activityViewController.setValue(subject, forKey: "subject")
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            var controller: UIViewController?
-            if #available(iOS 13.0, *) {
-                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                      let window = windowScene.windows.first else {
-                    return
-                }
-                controller = window.rootViewController
-            } else {
-                controller = UIApplication.shared.keyWindow?.rootViewController
-            }
-            
-            guard let viewController = controller else {
-                return
-            }
-            activityViewController.popoverPresentationController?.sourceView = viewController.view
-            activityViewController.popoverPresentationController?.sourceRect = rect
-        }
         
-        var rootViewController: UIViewController?
+        // Find the topmost view controller for presentation
+        var topViewController: UIViewController?
+        
         if #available(iOS 13.0, *) {
             guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                   let window = windowScene.windows.first else {
+                print("sharePdf error: No window scene found")
                 return
             }
-            rootViewController = window.rootViewController
+            topViewController = window.rootViewController
         } else {
-            rootViewController = UIApplication.shared.keyWindow?.rootViewController
+            topViewController = UIApplication.shared.keyWindow?.rootViewController
         }
         
-        guard let presenter = rootViewController else {
+        // Find the topmost presented view controller
+        while let presented = topViewController?.presentedViewController {
+            topViewController = presented
+        }
+        
+        guard let presenter = topViewController else {
+            print("sharePdf error: No view controller found to present from")
             return
         }
-        presenter.present(activityViewController, animated: true)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityViewController.popoverPresentationController?.sourceView = presenter.view
+            activityViewController.popoverPresentationController?.sourceRect = rect
+        }
+        
+        print("Presenting share dialog from: \(type(of: presenter))")
+        presenter.present(activityViewController, animated: true) {
+            print("Share dialog presented successfully")
+        }
     }
 
     func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
